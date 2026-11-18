@@ -34,13 +34,23 @@ mkdir -p "$TARGET"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 # 1. The kit's own skills
+# Backups go next to the skills folder, not inside it, so they never load as duplicate skills.
+BACKUP="$(dirname "$TARGET")/skill-backups/$STAMP"
 for s in website-builder skill-sharpen usage-audit; do
   if [ -d "$TARGET/$s" ]; then
-    mv "$TARGET/$s" "$TARGET/$s.bak-$STAMP"
-    echo "  Backed up existing $s to $s.bak-$STAMP"
+    mkdir -p "$BACKUP"
+    mv "$TARGET/$s" "$BACKUP/$s"
+    echo "  Backed up existing $s to $BACKUP/$s"
   fi
   cp -R "$KIT_DIR/skills/$s" "$TARGET/$s"
   echo "  Installed $s"
+done
+# Keep an already-downloaded design library and any local notes on a re-run
+for keep in library local.md; do
+  if [ -e "$BACKUP/website-builder/$keep" ]; then
+    cp -R "$BACKUP/website-builder/$keep" "$TARGET/website-builder/$keep"
+    echo "  Kept your existing website-builder/$keep"
+  fi
 done
 
 # 2. Settings
@@ -87,7 +97,9 @@ echo
 echo "Companion skills come from their authors' GitHub repos. Read them before you trust them."
 if command -v git >/dev/null 2>&1 && yesno 'Download companion skills and the design library now?' y; then
   TMP="$(mktemp -d)"; trap 'rm -rf "$TMP" 2>/dev/null || true' EXIT
-  if yesno '  Design library: 70+ real brand DESIGN.md files (VoltAgent/awesome-design-md)' y; then
+  if [ -d "$TARGET/website-builder/library/design-md" ]; then
+    echo "  Design library already installed"
+  elif yesno '  Design library: 70+ real brand DESIGN.md files (VoltAgent/awesome-design-md)' y; then
     lib="$(fetch VoltAgent/awesome-design-md)/design-md"
     mkdir -p "$TARGET/website-builder/library"
     rm -rf "$TARGET/website-builder/library/design-md"

@@ -26,14 +26,25 @@ New-Item -ItemType Directory -Force -Path $Target | Out-Null
 $Stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 
 # 1. The kit's own skills
+# Backups go next to the skills folder, not inside it, so they never load as duplicate skills.
+$Backup = Join-Path (Split-Path -Parent $Target) "skill-backups\$Stamp"
 foreach ($s in 'website-builder', 'skill-sharpen', 'usage-audit') {
   $dest = Join-Path $Target $s
   if (Test-Path $dest) {
-    Rename-Item $dest "$s.bak-$Stamp"
-    Write-Host "  Backed up existing $s to $s.bak-$Stamp"
+    New-Item -ItemType Directory -Force -Path $Backup | Out-Null
+    Move-Item $dest (Join-Path $Backup $s)
+    Write-Host "  Backed up existing $s to $Backup\$s"
   }
   Copy-Item -Recurse (Join-Path $KitDir "skills\$s") $dest
   Write-Host "  Installed $s"
+}
+# Keep an already-downloaded design library and any local notes on a re-run
+foreach ($keep in 'library', 'local.md') {
+  $old = Join-Path $Backup "website-builder\$keep"
+  if (Test-Path $old) {
+    Copy-Item -Recurse $old (Join-Path $Target "website-builder\$keep")
+    Write-Host "  Kept your existing website-builder\$keep"
+  }
 }
 
 # 2. Settings
@@ -79,7 +90,10 @@ $hasGit = [bool](Get-Command git -ErrorAction SilentlyContinue)
 if ($hasGit -and (YesNo 'Download companion skills and the design library now?' 'y')) {
   New-Item -ItemType Directory -Force -Path $Tmp | Out-Null
   try {
-    if (YesNo '  Design library: 70+ real brand DESIGN.md files (VoltAgent/awesome-design-md)' 'y') {
+    if (Test-Path (Join-Path $Target 'website-builder\library\design-md')) {
+      Write-Host '  Design library already installed'
+    }
+    elseif (YesNo '  Design library: 70+ real brand DESIGN.md files (VoltAgent/awesome-design-md)' 'y') {
       $lib = Join-Path (Fetch 'VoltAgent/awesome-design-md') 'design-md'
       $libDest = Join-Path $Target 'website-builder\library\design-md'
       New-Item -ItemType Directory -Force -Path (Split-Path $libDest) | Out-Null

@@ -1,5 +1,7 @@
 # Cinematic sites: layered scroll storytelling
 
+The principles, the layered approach and the one-shot brief below come from Nate Herk's videos on building websites with Claude ("I Studied 10,000 AI Websites", "Fable 5.1 Kills AI Website Slop"); the scroll patterns and code are this kit's own.
+
 Read this for any site meant to feel premium, "Apple-like", award-worthy or "not AI-made".
 That is the default look unless the user asked for something plain.
 
@@ -35,7 +37,7 @@ explicitly.
 
 | Gallery | Good for |
 |---|---|
-| godly.website | Trending sites, and separate views for heroes, CTAs, footers |
+| recent.design (formerly godly.website) | Trending sites, and separate views for heroes, CTAs, footers |
 | awwwards.com | Award winners by industry (pick the user's niche) |
 | 21st.dev | Components with a "copy prompt" button: backgrounds, scroll containers, cards, FAQs |
 | motionsites (search "motion sites animated backgrounds") | Animated hero backgrounds |
@@ -141,7 +143,7 @@ Don't reuse a real company's name, logo, photos or exact copy.
 When the user wants a quick, ambitious first version, brief the build like this (fill in):
 
 > Build [one / two distinctly different] [product] sites that could win a design award.
-> Inspiration: [sites], and components from 21st.dev / godly.website. Make up or use the
+> Inspiration: [sites], and components from 21st.dev / recent.design. Make up or use the
 > branding: [brand]. Get the assets: [generate with … / free stock / SVG]. Every site needs:
 > subtle but premium scroll-driven animation, text reveals, layering so the whole site has
 > depth as you scroll, and different animations at different depths. Screenshot and verify

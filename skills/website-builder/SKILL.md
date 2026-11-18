@@ -23,6 +23,9 @@ these defaults and mention once that running the installer sets them:
 | `screenshots` | true | Take screenshots in the check phase (if false, use `read_page` text checks and say so) |
 | `ask_before_publish` | true | Always ask before deploying or pushing. Treat it as true even if set otherwise |
 
+If `local.md` exists in this folder, read it too: it holds your own rules (skills to avoid,
+extra libraries) and wins over this file. The installer keeps it on updates.
+
 ## 1. Opening questions (ask once, at the start)
 
 Use AskUserQuestion with one call holding these questions. Skip any the request already

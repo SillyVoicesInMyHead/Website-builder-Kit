@@ -19,7 +19,7 @@ Read only the section for the languages the user picked.
 
 ## Rust compiled to WebAssembly
 
-- Use `rust-best-practices` for the Rust side, plus `rust-async-patterns` only if there is async work.
+- Rust skills are not part of this kit. If installed, use `rust-best-practices` (apollographql/rust-best-practices); otherwise rely on general Rust knowledge.
 - Build with `wasm-pack build --target web` and load it from plain JS. Keep the page itself
   in HTML/CSS/JS so the design skills still apply.
 - Check that `wasm-pack` is installed. If it's missing, ask before installing it.
