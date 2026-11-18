@@ -56,7 +56,7 @@ skills to save tokens produced a thin, generic page.
 |---|---|---|
 | Copy | The three Ps: the pain, the person who has it, the promise. Then one next step (the CTA) | |
 | Direction | `frontend-design`, then `tells` before freezing the look. Pick 2-3 real sites to borrow from and write what to take from each (`references/cinematic.md`) | Brand named: one file from `library/design-md/<brand>/DESIGN.md`. Clone a site: workflow in `references/cinematic.md`. Video link: `video-to-skill` |
-| Assets | Plan the layers (back, middle, subject, front), then get one image per layer the way the user chose (`references/cinematic.md`, Assets). Credit stock photos | Paid generation: ask once with the count and cost first |
+| Assets | Plan the layers (back, middle, subject, front), then get one image per layer the way the user chose (`references/cinematic.md`, Assets). Write down what surface the product stands on in the scene, and check every image shows the same product. Credit stock photos | Paid generation: ask once with the count and cost first |
 | Build | `references/stacks.md`, and `references/craft-standards.md` before writing CSS | |
 | Motion | `motion-principles`, plus 3-5 scroll patterns from `references/cinematic.md` (one or two big moments) | Native scroll effects: `css-native` |
 | Phone | Phone checklist in `references/craft-standards.md` | |
@@ -77,6 +77,12 @@ skills to save tokens produced a thin, generic page.
    doesn't count. For each pinned section capture start, middle and end. Look for layer gaps
    or edges, hard cuts between sections, text over busy imagery and anything out of bounds.
 3. Treat clipped content in a screenshot as a real bug until a second method shows it isn't.
+   Physical sense is part of the check: zoom in where each product meets the scene. A product
+   floating in mid-air, at the wrong scale, or in a dark box is a bug. Pin it to a real surface
+   in the photo (`references/cinematic.md`, Placing a product into a scene photo), and check
+   at desktop, phone and wide screens and through the whole scroll, including every layer that
+   passes in front of it. Reload with fresh CSS and JS before
+   judging: version the links (`styles.css?v=2`) so a cached old page can't fool you or the user.
 4. Do two critique-and-fix rounds (one on `small`): name the 3 worst visual problems, fix them,
    re-screenshot those spots. Judge against `references/craft-standards.md`.
 5. If the browser can't render or animate, say which checks stayed unverified.

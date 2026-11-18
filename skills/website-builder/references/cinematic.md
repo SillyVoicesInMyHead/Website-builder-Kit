@@ -68,6 +68,66 @@ Making layers from one photo: put the photo as the back layer, then add foregrou
 (leaves, ridges, haze) and a soft gradient overlay as separate layers. A `mask-image` or
 `clip-path` can cut a subject out of a clean background. Never ship a hero with no imagery.
 
+### Placing a product into a scene photo
+
+A product dropped into a room photo by flex or padding lands wherever the layout puts it,
+which is often in mid-air: a lamp floating over a bed, a bottle hovering over a table. Real
+objects stand on something. So:
+
+1. **Plan the contact point in the photo.** Before building, write down which surface the
+   object stands on (nightstand top, desk, shelf, floor) and its pixel position in the photo
+   file (open the image and read the coordinates). If the photo has no fitting surface,
+   generate or pick one that does, or generate the product already in the scene.
+2. **Cut it out properly.** Use a real transparent PNG/WebP cutout (alpha from the product's
+   silhouette), not `mix-blend-mode` or a radial mask over a black square: blends wash out
+   dark parts and masks leave a dark halo.
+3. **Pin it to the photo, not the layout.** Map the photo point to the screen with the image's
+   own `object-fit: cover` crop, `object-position` and transform, at every viewport size.
+   The cutout `el` must be `position: absolute; left: 0; top: 0` inside a box the same size
+   and place as the photo's box (the same layer, or a sibling layer with `inset: 0`), and the
+   photo's `transform-origin` must be the default centre:
+
+   ```js
+   function pin(el, img, px, py, pw) {          // px, py, pw in the photo's own pixels
+     if (!img.naturalWidth || !el.naturalWidth) return;  // not loaded yet: the load handler calls again
+     const W = img.offsetWidth, H = img.offsetHeight;
+     const k = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+     const [ox, oy] = getComputedStyle(img).objectPosition.split(' ').map(parseFloat);
+     const m = new DOMMatrixReadOnly(getComputedStyle(img).transform); // scale about centre
+     let x = (W - img.naturalWidth * k) * ox / 100 + px * k;
+     let y = (H - img.naturalHeight * k) * oy / 100 + py * k;
+     x = W / 2 + m.a * (x - W / 2) + m.e;  y = H / 2 + m.d * (y - H / 2) + m.f;
+     const w = pw * k * m.a, h = w * el.naturalHeight / el.naturalWidth;  // el: the cutout <img>
+     el.style.width = w + 'px';
+     el.style.transform = `translate(${x - w / 2}px, ${y - h}px)`;        // base sits on the point
+   }
+   ```
+
+   Call it when both images have loaded (`Promise.all([img.decode(), el.decode()])`, or a
+   `load` listener on each), again on resize, and before any reduced-motion early return.
+   Keep the cutout hidden (`visibility: hidden`) until the first call has placed it.
+4. **Same depth as the photo.** In a parallax stack, give the object's layer the same depth
+   factor as the photo layer, or it slides off its surface while scrolling. Keep it above any
+   darkening wash layers so it stays the brightest thing in the scene.
+5. **Ground it.** A contact shadow or light pool under the base, light spill on the wall
+   behind, and a believable size next to the furniture.
+6. **Phones crop the photo differently.** Set a phone `object-position` that keeps the surface
+   in view, and check the object didn't slide off the screen edge.
+7. **Keep the surface on screen at every desktop size.** Run the same mapping for the
+   surface's left and right edges at 1280×720, 1440×900, 1920×1080 and 2560 wide. If an edge
+   lands off screen, shift `object-position` x or zoom out (a smaller `scale()`).
+8. **Anything that passes in front must cover the object and its surface together.** A
+   foreground layer (bedding, leaves, a dark wipe) that covers the surface but not the object
+   makes it float again, mid-scroll. Remove that layer, keep it below the surface line, or fade
+   the object by exactly that layer's opacity at the object's base, read from its position on
+   every scroll frame.
+9. **Check every scroll state, not just the first screen.** Placement that's right at the
+   top of the page can break at 50%, 85% and the end of the section.
+10. **One product, every image.** Generated images drift: one may show a knob where another has
+    a ring, or a different base shape. Put every image of the product side by side before
+    building, and make the copy describe what the pictures show. Crop to the matching detail,
+    or regenerate (ask first if it costs credits).
+
 ## Scroll patterns (pick 3 to 5; one or two are the big moments)
 
 | Pattern | Build |
@@ -119,6 +179,21 @@ if (!reduce) { addEventListener('scroll', () => requestAnimationFrame(tick), { p
 - Phones: shorter pinned sections, fewer layers if it janks, no hover-only effects.
 - Content reads correctly if JS fails.
 - No hard cuts between sections: overlap the next section's background into the last layer.
+  For a pinned photo section, put static gradient edges inside the sticky frame, under the
+  text, matching the colours of the sections above and below. They then work with reduced
+  motion and without JS, and never cover the captions.
+- Text over a bright photo needs its own backing: a soft radial scrim behind it. Behind a
+  sticky frame, a `z-index: -1` pseudo-element drops under the photo unless its parent has its
+  own `z-index`.
+- Fade product layers with `opacity` and dim cards with an overlay's opacity, not `filter`:
+  filters repaint on every scroll frame.
+- No dead buttons: a call to action on a demo opens something or says honestly what happens.
+  A link to its own section reads as broken.
+- When two layers clash, fix where they meet; don't delete a layer. Removing a foreground
+  layer to stop it crossing the product cured the overlap but left a flat, dark scene. Mask
+  the layer instead, with its fade edge set in pixels from the product's measured position
+  (a fixed percentage drifts across widths), and turn it off only where the crop leaves it no
+  room. After any fix, compare before and after screenshots for lost depth, not just the bug.
 
 ## Check: watch it like a visitor
 
@@ -126,6 +201,24 @@ Scroll in steps of about half a screen and screenshot each step, so the screensh
 like a video of the scroll. For every pinned section capture start, middle and end. Look for:
 layers that leave gaps or show edges, hard cuts between sections, text over busy imagery,
 anything out of bounds, and jank. Do the same at phone width. Fix and re-capture the bad steps.
+
+Then a **does-this-make-physical-sense pass**: zoom into each place a product meets the scene
+and ask what holds it up. Floating, wrong scale, light from the wrong side, or a dark box around
+a cutout is a bug, as serious as clipped text.
+
+Tool notes:
+- Headless Chrome or Edge may lay a page out wider than a narrow `--window-size` asks for, so
+  take phone screenshots in the browser pane at 375 wide, and read `innerWidth` before trusting
+  any phone shot.
+- Headless `--screenshot` captures the top of the page only. Scroll states need the browser
+  pane or Playwright.
+- A screenshot taken right after a scroll or reload can show an earlier frame, or a fade still
+  in progress. Read the computed `opacity`, or take a second shot, before judging.
+- Background tabs throttle animation frames, so scroll-driven values don't update there.
+  Bring the tab to the front before measuring scroll states.
+- Prove placement with numbers as well as pictures: the object's rect against the mapped
+  surface point, and the transforms of the photo and object layers (they must be equal), at
+  each scroll state you check.
 
 ## Clone a reference, then rebrand
 
