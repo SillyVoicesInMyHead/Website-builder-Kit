@@ -138,7 +138,10 @@ if ($hasGit -and (YesNo 'Download companion skills and the design library now?' 
     }
   }
   finally {
-    if (Test-Path $Tmp) { Remove-Item -Recurse -Force $Tmp }
+    if (Test-Path $Tmp) {
+      try { Remove-Item -Recurse -Force $Tmp -ErrorAction Stop }
+      catch { Write-Host "  Could not delete the temp folder $Tmp (a file is in use); it is safe to delete later." }
+    }
   }
 }
 else {
